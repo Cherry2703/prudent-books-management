@@ -1,70 +1,40 @@
-# Getting Started with Create React App
+### Books Management System
+This is a React-based Books Management System that allows you to manage a collection of books, including adding, editing, and deleting books. It interacts with a backend API to fetch, create, update, and delete book records. The UI is built using React and styled with React Bootstrap.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+### Features
 
-## Available Scripts
+# Add a New Book: Users can add new books to the system.
+# Edit Book Details: Users can edit the details of an existing book.
+# Delete Book: Users can delete a book from the system.
+# View Books: The list of books is displayed in a table format, and it shows information such as Title, Author, Genre, Pages, and Published Date.
 
-In the project directory, you can run:
 
-### `npm start`
+## Technologies Used
+React: For building the user interface.
+React Bootstrap: For styling the components.
+Axios: For making API requests to fetch, update, and delete books from the backend.
+React Hooks: For managing state and lifecycle methods (useState, useEffect).
+React Modal: For showing pop-up modals for adding and editing books.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Installation
+To run this project locally, follow the steps below:
 
-### `npm test`
+Prerequisites
+Make sure you have the following installed:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Node.js: You can download it from here.
+npm: Comes with Node.js.
 
-### `npm run build`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### API Integration
+This project uses a backend API for books management, hosted at:
 
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+# API URL: https://prudent-books-management.onrender.com/books
+## API Endpoints
+GET /books: Fetches the list of all books.
+POST /books: Adds a new book to the system.
+PUT /books/:id: Updates an existing book.
+DELETE /books/:id: Deletes a book from the system.

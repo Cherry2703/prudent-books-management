@@ -1,37 +1,30 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
-
-import { Table, Button, Form, Modal, Container } from 'react-bootstrap';
-
-import './index.css'
-
+import { Table, Button, Form, Modal, Container } from "react-bootstrap";
+import "./index.css";
 
 const BooksManagement = () => {
   const [books, setBooks] = useState([]);
   const [show, setShow] = useState(false);
   const [bookDetails, setBookDetails] = useState({
-    BookID: '',
-    title: '',
-    author: '',
-    genre: '',
-    pages: '',
-    publishedDate: '',
+    BookID: "",
+    title: "",
+    author: "",
+    genre: "",
+    pages: "",
+    publishedDate: "",
   });
   const [editMode, setEditMode] = useState(false);
 
-  // API Base URL
-  const apiURL = 'https://prudent-books-management.onrender.com/books';
+  const apiURL = "https://prudent-books-management.onrender.com/books";
 
-  // Fetch Books on Component Mount
   const fetchBooks = async () => {
     try {
       const response = await axios.get(apiURL);
-      console.log(response.data);
-      
       setBooks(response.data);
     } catch (error) {
-      console.error('Error fetching books:', error);
+      console.error("Error fetching books:", error);
     }
   };
 
@@ -39,25 +32,30 @@ const BooksManagement = () => {
     fetchBooks();
   }, []);
 
-  // Handle Input Change
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setBookDetails({ ...bookDetails, [name]: value });
+    setBookDetails((prevDetails) => ({ ...prevDetails, [name]: value }));
   };
 
-  // Open Modal for Add or Edit
   const handleShow = (book = null) => {
     if (book) {
-      setBookDetails(book);
+      setBookDetails({
+        BookID: book.BookID,
+        title: book.Title,
+        author: book.Author,
+        genre: book.Genre,
+        pages: book.Pages,
+        publishedDate: book.PublishedDate,
+      });
       setEditMode(true);
     } else {
       setBookDetails({
-        BookID: '',
-        title: '',
-        author: '',
-        genre: '',
-        pages: '',
-        publishedDate: '',
+        BookID: "",
+        title: "",
+        author: "",
+        genre: "",
+        pages: "",
+        publishedDate: "",
       });
       setEditMode(false);
     }
@@ -66,30 +64,26 @@ const BooksManagement = () => {
 
   const handleClose = () => setShow(false);
 
-  // Add or Update Book
   const handleSubmit = async () => {
     try {
       if (editMode) {
-        // Update Book
         await axios.put(`${apiURL}/${bookDetails.BookID}`, bookDetails);
       } else {
-        // Add New Book
         await axios.post(apiURL, bookDetails);
       }
       fetchBooks();
       handleClose();
     } catch (error) {
-      console.error('Error saving book:', error);
+      console.error("Error saving book:", error);
     }
   };
 
-  // Delete Book
   const handleDelete = async (id) => {
     try {
       await axios.delete(`${apiURL}/${id}`);
       fetchBooks();
     } catch (error) {
-      console.error('Error deleting book:', error);
+      console.error("Error deleting book:", error);
     }
   };
 
@@ -97,12 +91,10 @@ const BooksManagement = () => {
     <Container>
       <h1 className="text-center my-4">Books Management</h1>
 
-      {/* Add Book Button */}
       <Button variant="primary" onClick={() => handleShow()}>
         Add Book
       </Button>
 
-      {/* Books Table */}
       <Table striped bordered hover className="mt-4">
         <thead>
           <tr>
@@ -118,11 +110,11 @@ const BooksManagement = () => {
           {books.length > 0 ? (
             books.map((book) => (
               <tr key={book.BookID}>
-                <td>{book.title}</td>
-                <td>{book.author}</td>
-                <td>{book.genre}</td>
-                <td>{book.pages}</td>
-                <td>{book.publishedDate}</td>
+                <td>{book.Title}</td>
+                <td>{book.Author}</td>
+                <td>{book.Genre}</td>
+                <td>{book.Pages}</td>
+                <td>{book.PublishedDate}</td>
                 <td>
                   <Button
                     variant="warning"
@@ -152,10 +144,9 @@ const BooksManagement = () => {
         </tbody>
       </Table>
 
-      {/* Add/Edit Book Modal */}
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
-          <Modal.Title>{editMode ? 'Edit Book' : 'Add Book'}</Modal.Title>
+          <Modal.Title>{editMode ? "Edit Book" : "Add Book"}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
@@ -211,7 +202,7 @@ const BooksManagement = () => {
             Close
           </Button>
           <Button variant="primary" onClick={handleSubmit}>
-            {editMode ? 'Update Book' : 'Add Book'}
+            {editMode ? "Update Book" : "Add Book"}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -220,3 +211,6 @@ const BooksManagement = () => {
 };
 
 export default BooksManagement;
+
+
+
