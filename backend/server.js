@@ -11,6 +11,8 @@ const { v4: uuidv4 } = require("uuid");
 
 let db;
 
+app.use(express.json())
+
 
 const initializeDBAndServer = async() =>{
     try {
@@ -67,210 +69,137 @@ app.get("/books", async (req, res) => {
 
 
 
-
-
-
-
-app.post('/books', async (req, res) => {
-  const { Title, AuthorName, Genre, Pages, PublishedDate } = req.body;
-
-  if (!Title || !AuthorName || !Genre || !Pages || !PublishedDate) {
-    return res.status(400).json({ error: 'All fields are required.' });
-  }
-
-  try {
-    let AuthorID, GenreID;
-
-    // Step 1: Check or Add Author
-    const checkAuthorSQL = `SELECT AuthorID FROM Authors WHERE Name = ?`;
-    const insertAuthorSQL = `INSERT INTO Authors (AuthorID, Name) VALUES (?, ?)`;
-
-    const authorRow = await new Promise((resolve, reject) => {
-      db.get(checkAuthorSQL, [AuthorName], (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
-      });
-    });
-
-    if (authorRow) {
-      AuthorID = authorRow.AuthorID;
-    } else {
-      AuthorID = uuidv4(); // Generate new AuthorID
-      await new Promise((resolve, reject) => {
-        db.run(insertAuthorSQL, [AuthorID, AuthorName], (err) => {
-          if (err) reject(err);
-          else resolve();
-        });
-      });
-    }
-
-    // Step 2: Check or Add Genre
-    const checkGenreSQL = `SELECT GenreID FROM Genres WHERE Name = ?`;
-    const insertGenreSQL = `INSERT INTO Genres (GenreID, Name, Description) VALUES (?, ?, ?)`;
-
-    const genreRow = await new Promise((resolve, reject) => {
-      db.get(checkGenreSQL, [Genre], (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
-      });
-    });
-
-    if (genreRow) {
-      GenreID = genreRow.GenreID;
-    } else {
-      GenreID = uuidv4(); // Generate new GenreID
-      const GenreDescription = `Description for ${Genre}`;
-      await new Promise((resolve, reject) => {
-        db.run(insertGenreSQL, [GenreID, Genre, GenreDescription], (err) => {
-          if (err) reject(err);
-          else resolve();
-        });
-      });
-    }
-
-    // Step 3: Insert Book Record
-    const BookID = uuidv4();
-    const insertBookSQL = `
-      INSERT INTO Books (BookID, Title, AuthorID, GenreID, Pages, PublishedDate)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `;
-
-    await new Promise((resolve, reject) => {
-      db.run(
-        insertBookSQL,
-        [BookID, Title, AuthorID, GenreID, Pages, PublishedDate],
-        (err) => {
-          if (err) reject(err);
-          else resolve();
-        }
-      );
-    });
-
-    res.status(201).json({ message: 'Book added successfully!', BookID });
-  } catch (error) {
-    res.status(500).json({ error: 'Internal server error', details: error.message });
-  }
-});
-
-
-
-
-
-
-
-
-app.put('/books/:id', async (req, res) => {
-    const { id } = req.params; 
-    const { Title, AuthorName, Genre, Pages, PublishedDate } = req.body;
-  
-    if (!Title || !AuthorName || !Genre || !Pages || !PublishedDate) {
-      return res.status(400).json({ error: 'All fields are required.' });
-    }
-  
+app.post('/books/', async (request, response) => {
     try {
-      let AuthorID, GenreID;
-      const checkAuthorSQL = `SELECT AuthorID FROM Authors WHERE Name = ?`;
-      const insertAuthorSQL = `INSERT INTO Authors (AuthorID, Name) VALUES (?, ?)`;
-  
-      const authorRow = await new Promise((resolve, reject) => {
-        db.get(checkAuthorSQL, [AuthorName], (err, row) => {
-          if (err) reject(err);
-          else resolve(row);
-        });
-      });
-  
-      if (authorRow) {
-        AuthorID = authorRow.AuthorID;
-      } else {
-        AuthorID = uuidv4(); 
-        await new Promise((resolve, reject) => {
-          db.run(insertAuthorSQL, [AuthorID, AuthorName], (err) => {
-            if (err) reject(err);
-            else resolve();
-          });
-        });
+      const { title, author, genre, pages, publishedDate } = request.body;
+        if (!title || !author || !genre || !pages || !publishedDate) {
+        return response.status(400).send({ error: 'Missing required fields: title, author, genre, pages, or publishedDate.' });
       }
-    const checkGenreSQL = `SELECT GenreID FROM Genres WHERE Name = ?`;
-      const insertGenreSQL = `INSERT INTO Genres (GenreID, Name, Description) VALUES (?, ?, ?)`;
   
-      const genreRow = await new Promise((resolve, reject) => {
-        db.get(checkGenreSQL, [Genre], (err, row) => {
-          if (err) reject(err);
-          else resolve(row);
-        });
-      });
+      let authorQuery = `SELECT AuthorID FROM Authors WHERE name = ?`;
+      let authorResult = await db.get(authorQuery, [author]);
+      let AuthorID;
   
-      if (genreRow) {
-        GenreID = genreRow.GenreID;
+      if (!authorResult) {
+        AuthorID = uuidv4();
+        const insertAuthor = `INSERT INTO Authors (AuthorID, name) VALUES (?, ?);`;
+        await db.run(insertAuthor, [AuthorID, author]);
       } else {
-        GenreID = uuidv4(); 
-        const GenreDescription = `Description for ${Genre}`;
-        await new Promise((resolve, reject) => {
-          db.run(insertGenreSQL, [GenreID, Genre, GenreDescription], (err) => {
-            if (err) reject(err);
-            else resolve();
-          });
-        });
+        AuthorID = authorResult.AuthorID;
       }
-        const updateBookSQL = `
+  
+      let genreQuery = `SELECT GenreID FROM Genres WHERE name = ?`;
+      let genreResult = await db.get(genreQuery, [genre]);
+      let GenreID;
+  
+      if (!genreResult) {
+        GenreID = uuidv4();
+        const insertGenre = `INSERT INTO Genres (GenreID, name, description) VALUES (?, ?, ?);`;
+        await db.run(insertGenre, [GenreID, genre, '']);
+      } else {
+        GenreID = genreResult.GenreID;
+      }
+  
+      const BookID = uuidv4();
+      const insertBook = `INSERT INTO Books (BookID, Title, AuthorID, GenreID, Pages, PublishedDate)
+                          VALUES (?, ?, ?, ?, ?, ?);`;
+      await db.run(insertBook, [BookID, title, AuthorID, GenreID, pages, publishedDate]);
+  
+      response.status(200).send({ message: 'Book added successfully!', BookID });
+    } catch (error) {
+      console.error('Error adding book:', error);
+      response.status(500).send({ error: 'Internal Server Error' });
+    }
+  });
+
+
+
+
+  app.put('/books/:id', async (request, response) => {
+    try {
+      const { id } = request.params; 
+      const { title, author, genre, pages, publishedDate } = request.body;
+  
+      const getBookQuery = `SELECT * FROM Books WHERE BookID = ?;`;
+      const book = await db.get(getBookQuery, [id]);
+  
+      if (!book) {
+        return response.status(404).send({ error: 'Book not found' });
+      }
+  
+      const updatedTitle = title || book.Title;
+      const updatedPages = pages || book.Pages;
+      const updatedPublishedDate = publishedDate || book.PublishedDate;
+  
+      let updatedAuthorID = book.AuthorID;
+      if (author) {
+        const authorQuery = `SELECT AuthorID FROM Authors WHERE name = ?;`;
+        const authorResult = await db.get(authorQuery, [author]);
+        if (!authorResult) {
+          updatedAuthorID = uuidv4();
+          const insertAuthor = `INSERT INTO Authors (AuthorID, name) VALUES (?, ?);`;
+          await db.run(insertAuthor, [updatedAuthorID, author]);
+        } else {
+          updatedAuthorID = authorResult.AuthorID;
+        }
+      }
+  
+      let updatedGenreID = book.GenreID;
+      if (genre) {
+        const genreQuery = `SELECT GenreID FROM Genres WHERE name = ?;`;
+        const genreResult = await db.get(genreQuery, [genre]);
+        if (!genreResult) {
+          updatedGenreID = uuidv4();
+          const insertGenre = `INSERT INTO Genres (GenreID, name, description) VALUES (?, ?, ?);`;
+          await db.run(insertGenre, [updatedGenreID, genre, '']);
+        } else {
+          updatedGenreID = genreResult.GenreID;
+        }
+      }
+  
+      const updateBookQuery = `
         UPDATE Books
         SET Title = ?, AuthorID = ?, GenreID = ?, Pages = ?, PublishedDate = ?
-        WHERE BookID = ?
+        WHERE BookID = ?;
       `;
+      await db.run(updateBookQuery, [
+        updatedTitle,
+        updatedAuthorID,
+        updatedGenreID,
+        updatedPages,
+        updatedPublishedDate,
+        id,
+      ]);
   
-      const result = await new Promise((resolve, reject) => {
-        db.run(
-          updateBookSQL,
-          [Title, AuthorID, GenreID, Pages, PublishedDate, id],
-          function (err) {
-            if (err) reject(err);
-            else resolve(this.changes);
-          }
-        );
-      });
-  
-      if (result > 0) {
-        res.status(200).json({ message: 'Book updated successfully.' });
-      } else {
-        res.status(404).json({ error: 'Book not found or no changes made.' });
-      }
+      response.status(200).send({ message: 'Book updated successfully!' });
     } catch (error) {
-      res.status(500).json({ error: 'Internal server error', details: error.message });
+      console.error('Error updating book:', error);
+      response.status(500).send({ error: 'Internal Server Error' });
     }
   });
   
 
 
-  app.delete('/books/:id', async (req, res) => {
-    const { id } = req.params;
-  
+
+
+  app.delete('/books/:id', async (request, response) => {
     try {
-      const checkBookSQL = `SELECT * FROM Books WHERE BookID = ?`;
-      const book = await new Promise((resolve, reject) => {
-        db.get(checkBookSQL, [id], (err, row) => {
-          if (err) reject(err);
-          else resolve(row);
-        });
-      });
+      const { id } = request.params; 
+  
+      const getBookQuery = `SELECT * FROM Books WHERE BookID = ?;`;
+      const book = await db.get(getBookQuery, [id]);
   
       if (!book) {
-        return res.status(404).json({ error: 'Book not found.' });
+        return response.status(404).send({ error: 'Book not found' });
       }
-        const deleteBookSQL = `DELETE FROM Books WHERE BookID = ?`;
-      const result = await new Promise((resolve, reject) => {
-        db.run(deleteBookSQL, [id], function (err) {
-          if (err) reject(err);
-          else resolve(this.changes);
-        });
-      });
   
-      if (result > 0) {
-        res.status(200).json({ message: 'Book deleted successfully.' });
-      } else {
-        res.status(400).json({ error: 'Failed to delete the book.' });
-      }
+      const deleteBookQuery = `DELETE FROM Books WHERE BookID = ?;`;
+      await db.run(deleteBookQuery, [id]);
+  
+      response.status(200).send({ message: 'Book deleted successfully!' });
     } catch (error) {
-      res.status(500).json({ error: 'Internal server error', details: error.message });
+      console.error('Error deleting book:', error);
+      response.status(500).send({ error: 'Internal Server Error' });
     }
   });
   

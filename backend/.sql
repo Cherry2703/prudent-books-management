@@ -44,7 +44,7 @@
 
 
 
-
+select * from authors;
 select * from Genres;
 select * from books;
 
