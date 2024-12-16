@@ -4,6 +4,7 @@ const port = process.env.PORT || 3004
 const {open} = require('sqlite')
 const sqlite3 = require('sqlite3')
 const path = require('path')
+const cors = require('cors')
 
 const dbpath = path.join(__dirname,'./database.db')
 
@@ -12,6 +13,7 @@ const { v4: uuidv4 } = require("uuid");
 let db;
 
 app.use(express.json())
+app.use(cors())
 
 
 const initializeDBAndServer = async() =>{
@@ -38,7 +40,7 @@ initializeDBAndServer()
 app.get('/',async(request,response)=>{
     response.status(200).send('Books Management Backend is Working go for different routes')
 })
-
+ 
 
 
 
